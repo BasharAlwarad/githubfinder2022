@@ -21,31 +21,47 @@ export const GithubProvider = ({ children }) => {
 
   // @desc      git initial default users
   // @func      GET
-  const fetchUsers = async () => {
+  const searchUsers = async text => {
     try {
       setLoading()
-      const response = await fetch(`${GITHUB_URL}/users`, {
+      const params = new URLSearchParams({
+        q: text,
+      })
+      const response = await fetch(`${GITHUB_URL}/search/users?${params}`, {
         headers: {
           Authorization: `token ${GITHUB_TOKEN}`,
         },
       })
-      const data = await response.json()
+      const { items } = await response.json()
       // setUsers(data)
       // setLoading(false)
 
       dispatch({
         type: 'GET_USERS',
-        payload: data,
+        payload: items,
       })
     } catch (error) {
       console.error(error.message)
     }
   }
 
+  const clearUsers = () => {
+    dispatch({
+      type: 'CLEAR_USERS',
+    })
+  }
+
   const setLoading = () => dispatch({ type: 'SET_LOADING' })
 
   return (
-    <GithubContext.Provider value={{ users, loading, fetchUsers }}>
+    <GithubContext.Provider
+      value={{
+        users,
+        loading,
+        clearUsers,
+        searchUsers,
+      }}
+    >
       {children}
     </GithubContext.Provider>
   )
